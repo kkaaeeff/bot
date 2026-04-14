@@ -53,6 +53,7 @@ async def handle_riddle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
         if index == len(RIDDLES):
             context.user_data["in_quiz"] = False
+            context.user_data["skip_off_topic_once"] = True
             await update.message.reply_text(f"Верно! {SECRET}")
             return ConversationHandler.END
 
@@ -70,6 +71,9 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def off_topic(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if context.user_data.get("skip_off_topic_once", False):
+        context.user_data["skip_off_topic_once"] = False
+        return
     if context.user_data.get("in_quiz", False):
         return
     await update.message.reply_text("это не относится к нашей теме!")

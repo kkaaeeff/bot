@@ -29,6 +29,7 @@ def normalize_text(text: str) -> str:
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     context.user_data["riddle_index"] = 0
+    context.user_data["in_quiz"] = True
     await update.message.reply_text(
         "Привет! Ответь на 5 загадок.\n\n"
         f"Загадка 1: {RIDDLES[0][0]}"
@@ -51,6 +52,7 @@ async def handle_riddle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         context.user_data["riddle_index"] = index
 
         if index == len(RIDDLES):
+            context.user_data["in_quiz"] = False
             await update.message.reply_text(f"Верно! {SECRET}")
             return ConversationHandler.END
 
@@ -62,11 +64,14 @@ async def handle_riddle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    context.user_data["in_quiz"] = False
     await update.message.reply_text("Ок, остановили. Для новой игры: /start")
     return ConversationHandler.END
 
 
 async def off_topic(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if context.user_data.get("in_quiz", False):
+        return
     await update.message.reply_text("это не относится к нашей теме!")
 
 
